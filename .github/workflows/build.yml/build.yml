@@ -1,4 +1,4 @@
-name: Build SHAGGY 100K vs 4K
+name: Build SHAGGY 100K vs 4Kxz
 
 on:
   workflow_dispatch:
