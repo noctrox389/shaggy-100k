@@ -1,0 +1,76 @@
+name: Build SHAGGY 100K vs 4K
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Haxe
+        uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.2.4
+
+      - name: Mostrar version de Haxe
+        run: haxe --version
+
+      - name: Instalar librerias
+        shell: cmd
+        run: |
+          haxelib install hxcpp 4.2.1 --always
+          haxelib install lime 7.9.0 --always
+          haxelib install openfl 9.1.0 --always
+
+          haxelib install flixel 4.10.0 --always
+          haxelib install flixel-addons 2.11.0 --always
+          haxelib install flixel-ui 2.4.0 --always
+          haxelib install hscript 2.4.0 --always
+
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+
+      - name: Seleccionar versiones
+        shell: cmd
+        run: |
+          haxelib set hxcpp 4.2.1
+          haxelib set lime 7.9.0
+          haxelib set openfl 9.1.0
+          haxelib set flixel 4.10.0
+          haxelib set flixel-addons 2.11.0
+          haxelib set flixel-ui 2.4.0
+          haxelib set hscript 2.4.0
+
+      - name: Configurar Lime
+        shell: cmd
+        run: |
+          haxelib run lime setup
+
+      - name: Mostrar librerias
+        shell: cmd
+        run: |
+          haxelib list
+
+      - name: Compilar Windows x64
+        shell: cmd
+        run: |
+          haxelib run lime build windows -release
+
+      - name: Ver archivos compilados
+        shell: powershell
+        run: |
+          Get-ChildItem -Path export/release/windows/bin -Recurse
+
+      - name: Subir juego compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHAGGY-100K-vs-4K-Windows
+          path: export/release/windows/bin/
+          if-no-files-found: error
